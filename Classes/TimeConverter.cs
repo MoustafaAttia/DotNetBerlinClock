@@ -5,9 +5,9 @@ using System.Text;
 
 namespace BerlinClock
 {
-    public class TimeConverter : ITimeConverter
-    {
-        private string ConvertSeconds(string aTime)
+    public class TimeConverter
+	{
+		private string ConvertSeconds(string aTime)
 		{
 			int seconds = Convert.ToInt16(aTime.Split(':')[2]);
 			return (seconds % 2) == 0 ? "Y" : "O";
@@ -60,11 +60,30 @@ namespace BerlinClock
 		}
 		private string ConvertTopLayerMinute(string aTime)
 		{
-			return "3";
+			string result = "OOOOOOOOOOO";
+			int minute = Convert.ToInt16(aTime.Split(':')[1]);
+			minute = minute / 5;
+			for(int i=0; i < minute; i++)
+			{
+				result = result.Remove(i,1).Insert(i,"Y");
+				if (i == 2 || i == 5 || i == 8)
+				{
+					result = result.Remove(i,1).Insert(i,"R");
+				}
+			}
+			return result;
 		}
 		private string ConvertBottomLayerMinute(string aTime)
 		{
-			return "3";
+			string result = "OOOO";
+			int minute = Convert.ToInt16(aTime.Split(':')[1]);
+			minute = minute % 5;
+			for(int i=0; i < minute; i++)
+			{
+				result = result.Remove(i,1).Insert(i,"Y");
+				
+			}
+			return result;
 		}
 		public string convertTime(string aTime)
 		{
@@ -88,5 +107,5 @@ namespace BerlinClock
 			return string.Join("\r\n", Array.ConvertAll<object, string>(result.ToArray(), Convert.ToString));
 
 		}
-    }
+	}
 }
