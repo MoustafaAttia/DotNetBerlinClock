@@ -5,41 +5,15 @@ using System.Text;
 
 namespace BerlinClock
 {
-    public class TimeConverter
+	public class TimeConverter
 	{
-		private string ConvertSeconds(string aTime)
+		private string ConvertSecondsLayer(int seconds)
 		{
-			int seconds = Convert.ToInt16(aTime.Split(':')[2]);
 			return (seconds % 2) == 0 ? "Y" : "O";
 		}
-		private string ConvertHour(string aTime, int row)
-		{
-			if (row == 1)
-			{
-				return ConvertTopLayerHour(aTime);
-			}
-			else if (row == 2)
-			{
-				return ConvertBottomLayerHour(aTime);
-			}
-			else return string.Empty;
-		}
-		private string ConvertMinute(string aTime, int row)
-		{
-			if (row == 1)
-			{
-				return ConvertTopLayerMinute(aTime);
-			}
-			else if (row == 2)
-			{
-				return ConvertBottomLayerMinute(aTime);
-			}
-			else return string.Empty;
-		}
-		private string ConvertTopLayerHour(string aTime)
+		private string ConvertTopLayerHour(int hour)
 		{
 			string result = "OOOO";
-			int hour = Convert.ToInt16(aTime.Split(':')[0]);
 			hour = hour / 5;
 			for(int i=0; i < hour; i++)
 			{
@@ -47,10 +21,9 @@ namespace BerlinClock
 			}
 			return result;
 		}
-		private string ConvertBottomLayerHour(string aTime)
+		private string ConvertBottomLayerHour(int hour)
 		{
 			string result = "OOOO";
-			int hour = Convert.ToInt16(aTime.Split(':')[0]);
 			hour = hour % 5;
 			for(int i=0; i < hour; i++)
 			{
@@ -58,10 +31,9 @@ namespace BerlinClock
 			}
 			return result;
 		}
-		private string ConvertTopLayerMinute(string aTime)
+		private string ConvertTopLayerMinute(int minute)
 		{
 			string result = "OOOOOOOOOOO";
-			int minute = Convert.ToInt16(aTime.Split(':')[1]);
 			minute = minute / 5;
 			for(int i=0; i < minute; i++)
 			{
@@ -73,10 +45,9 @@ namespace BerlinClock
 			}
 			return result;
 		}
-		private string ConvertBottomLayerMinute(string aTime)
+		private string ConvertBottomLayerMinute(int minute)
 		{
 			string result = "OOOO";
-			int minute = Convert.ToInt16(aTime.Split(':')[1]);
 			minute = minute % 5;
 			for(int i=0; i < minute; i++)
 			{
@@ -85,24 +56,64 @@ namespace BerlinClock
 			}
 			return result;
 		}
-		public string convertTime(string aTime)
+		private int GetHours(string aTime)
 		{
-			string incoorectMessage = "Incorrect time format!";
+			int hours = Convert.ToInt16(aTime.Split(':')[0]);
+			return hours;
+		}
+		private int GetMinutes(string aTime)
+		{
+			int minutes = Convert.ToInt16(aTime.Split(':')[1]);
+			return minutes;
+		}
+		private int GetMSeconds(string aTime)
+		{
+			int seconds = Convert.ToInt16(aTime.Split(':')[2]);
+			return seconds;
+		}
+		private bool IsValidTime(string aTime)
+		{
+			bool result = true;
 			if (string.IsNullOrEmpty(aTime))
 			{
-				return incoorectMessage;
+				result = false;
 			}
-			if (aTime.Split(':').Length != 3)
+			else if (aTime.Split(':').Length != 3)
 			{
-				return incoorectMessage;
+				result = false;
+			}
+			else {
+				int hours = GetHours(aTime); 
+				int minutes = GetMinutes(aTime); 
+				int seconds = GetMSeconds(aTime); 
+				if ( (hours >= 0 && hours <= 24) &&
+					(minutes >= 0 && minutes < 60) &&
+					(seconds >= 0 && seconds < 60) )
+					result = true;
+				else 
+					result = false;
+			}
+			
+			return result;
+		}
+		public string convertTime(string aTime)
+		{
+			string incorectMessage = "Incorrect time format!";
+			
+			if (!IsValidTime(aTime))
+			{
+				return incorectMessage;
 			}
 
 			string[] result = new string[5];
-			result[0] = ConvertSeconds(aTime);
-			result[1] = ConvertHour(aTime,1);
-			result[2] = ConvertHour(aTime,2);
-			result[3] = ConvertMinute(aTime,1);
-			result[4] = ConvertMinute(aTime,2);
+			int hours = GetHours(aTime); 
+			int minutes = GetMinutes(aTime); 
+			int seconds = GetMSeconds(aTime); 
+			result[0] = ConvertSecondsLayer(seconds);
+			result[1] = ConvertTopLayerHour(hours);
+			result[2] = ConvertBottomLayerHour(hours);
+			result[3] = ConvertTopLayerMinute(minutes);
+			result[4] = ConvertBottomLayerMinute(minutes);
 
 			return string.Join("\r\n", Array.ConvertAll<object, string>(result.ToArray(), Convert.ToString));
 
